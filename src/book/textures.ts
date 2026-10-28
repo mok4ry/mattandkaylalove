@@ -117,18 +117,20 @@ async function paper(ctx: Ctx, side: Side, seed: number) {
   ctx.fillRect(0, 0, w, h)
 }
 
-/** Word-wrap `text` into lines no wider than `width(lineIndex)`. */
+/** Word-wrap `text` into lines no wider than `width(lineIndex)`. A "\n" in the text always starts a new line. */
 function wrap(ctx: Ctx, text: string, width: (line: number) => number): string[] {
   const lines: string[] = []
-  let line = ''
-  for (const word of text.split(' ')) {
-    const attempt = line ? `${line} ${word}` : word
-    if (line && ctx.measureText(attempt).width > width(lines.length)) {
-      lines.push(line)
-      line = word
-    } else line = attempt
+  for (const paragraph of text.split('\n')) {
+    let line = ''
+    for (const word of paragraph.split(' ')) {
+      const attempt = line ? `${line} ${word}` : word
+      if (line && ctx.measureText(attempt).width > width(lines.length)) {
+        lines.push(line)
+        line = word
+      } else line = attempt
+    }
+    lines.push(line)
   }
-  if (line) lines.push(line)
   return lines
 }
 
@@ -279,7 +281,7 @@ const spreads: Record<Exclude<SceneId, 'cover'>, Spread> = {
       const { expecting } = content
       await draw(ctx, Cloud, 70, 80, 190, 90, { color: '#dfe8f4' })
       await draw(ctx, Star, 600, 120, 50, 50, { color: C.gold })
-      const end = text(ctx, expecting.heading, { font: `96px ${DISPLAY}`, color: C.leather, y: 380, lineHeight: 104, maxWidth: 520 })
+      const end = text(ctx, expecting.heading, { font: `86px ${DISPLAY}`, color: C.leather, y: 380, lineHeight: 100, maxWidth: 640 })
       ctx.save()
       ctx.translate(PAGE_PX.w / 2, end + 90)
       ctx.rotate(Math.PI / 4)
@@ -438,46 +440,48 @@ export async function paintCoverTitle(w: number, h: number) {
 }
 
 /**
- * The flipbook pages bound between the first spread and "We're expecting!".
- * Every side of every flipbook page is one frame of an animation: the heading's
- * letters jumping about, settling a little more each frame, until they land on
- * the real page. Riffled through, it plays like a flipbook. Painted smaller than
- * real pages: they flash past.
+ * The flipbook pages bound between the first spread and "Baby Mokary is on the way!".
+ * The left-hand side of each flipbook page is one frame of an animation: the heading's
+ * letters jumping about, settling a little more each frame, until they land on the
+ * real left page. The right-hand sides carry only a few drifting stars. Painted
+ * smaller than real pages: they flash past.
  */
 const FLIP_SCALE = 0.6
 
-/** Frames before the real page: the back of the page before the flipbook, then both sides of each flipbook page. */
-export const FLIP_FRAMES = 2 * FLIPS + 1
+/** Animation frames before the real page: the back of the page before the flipbook, then the back of each flipbook page but the last. */
+export const FLIP_FRAMES = FLIPS
 
 /** How unsettled frame `f` is: 1 = wildly scattered, 0 = at rest. */
 const chaos = (f: number) => Math.max(0, (FLIP_FRAMES - f) / FLIP_FRAMES)
 
-/** Paint animation frame `f` (0 … FLIP_FRAMES-1) on a page on the given side of the spine. */
+/** Paint flipbook page side `f`: on the left, animation frame f (0 … FLIP_FRAMES-1); on the right, just stars. */
 export async function paintFlipFrame(side: Side, f: number) {
   const { el, ctx } = canvas(Math.round(PAGE_PX.w * FLIP_SCALE), Math.round(PAGE_PX.h * FLIP_SCALE))
   ctx.scale(FLIP_SCALE, FLIP_SCALE)
-  await paper(ctx, side, 500 + f)
-  const r = rng(1000 + f * 31)
+  await paper(ctx, side, 500 + f * 2 + (side === 'left' ? 1 : 0))
+  const r = rng(1000 + f * 31 + (side === 'left' ? 0 : 17))
   const jitter = (amount: number) => (r() - 0.5) * 2 * amount
-  const a = chaos(f)
+  const a = side === 'left' ? chaos(f) : 1
 
-  // a few stars twinkling about, gathering in as the letters settle
+  // a few stars twinkling about (gathering in, on the left, as the letters settle)
   for (let i = 0; i < 6; i++) {
     const size = 26 + r() * 26
     await draw(ctx, i % 2 ? Star : Sparkle, 384 + jitter(330 * a + 60) - size / 2, 470 + jitter(420 * a + 120) - size / 2, size, size, {
       color: i % 2 ? C.gold : C.goldSoft,
     })
   }
+  if (side === 'right') return el
 
   // the heading laid out exactly as on the real page, each letter knocked out of place
-  ctx.font = `96px ${DISPLAY}`
+  // (same size and spacing as the real page, so the letters settle exactly where it prints them)
+  ctx.font = `86px ${DISPLAY}`
   ctx.fillStyle = C.leather
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
-  const lines = wrap(ctx, content.expecting.heading, () => 520)
+  const lines = wrap(ctx, content.expecting.heading, () => 640)
   lines.forEach((line, li) => {
     let x = PAGE_PX.w / 2 - ctx.measureText(line).width / 2
-    const y = 380 + li * 104
+    const y = 380 + li * 100
     for (const ch of line) {
       const cw = ctx.measureText(ch).width
       ctx.save()

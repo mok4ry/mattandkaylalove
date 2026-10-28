@@ -34,9 +34,9 @@ async function paintBook(): Promise<Canvases> {
     let front: Promise<HTMLCanvasElement>
     let back: Promise<HTMLCanvasElement>
     if (leaf.kind === 'flip') {
-      // flipbook page k: frames 2k-1 (front) and 2k (back); the last back is the real page the riffle settles on
-      front = paintFlipFrame('right', 2 * leaf.k - 1)
-      back = after.kind === 'story' ? paintPage(spreadAt(after.j), 'left', after.j * 2 - 1) : paintFlipFrame('left', 2 * leaf.k)
+      // flipbook page k: stars on the front, animation frame k on the back; the last back is the real page the riffle settles on
+      front = paintFlipFrame('right', leaf.k)
+      back = after.kind === 'story' ? paintPage(spreadAt(after.j), 'left', after.j * 2 - 1) : paintFlipFrame('left', leaf.k)
     } else {
       const { j } = leaf
       const next = spreadAt(j + 1)

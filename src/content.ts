@@ -31,7 +31,8 @@ export const content = {
   },
   expecting: {
     // left page
-    heading: "We're expecting!",
+    // \n chooses where the line breaks on the page
+    heading: 'Baby Mokary\nis on the way!',
     caption: 'Love, Matt & Kayla',
     // right page: a pair of baby footprints (drawn in src/book/textures.ts)
   },

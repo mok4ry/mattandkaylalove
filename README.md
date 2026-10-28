@@ -19,7 +19,7 @@ npm run share        # production build on your Wi-Fi (prints the address to ope
 - **Open the book:** tap it, or press →.
 - **Turn pages:** drag a page across, or tap the right page (forward) or the left page (back). The arrow keys work too. Going back from the first spread closes the book, and **Start over** closes it from anywhere.
 - **On a phone held upright,** one page shows at a time, at full size. Swipe left (or tap) to move to the right page; swipe again and the page turns while the view glides back to the new left page. Swiping right does the same in reverse, and from the first page it closes the book. The rules live in `src/book/navigation.ts`.
-- **The flipbook:** turning past "Once upon a time" riffles through a stack of extra pages. The letters of "We're expecting!" jump about across them and settle onto the real page. The frames are painted by `paintFlipFrame` in `src/book/textures.ts`.
+- **The flipbook:** turning past "Once upon a time" riffles through a stack of extra pages. The letters of "Baby Mokary is on the way!" jump about across them and settle onto the real page. The frames are painted by `paintFlipFrame` in `src/book/textures.ts`.
 - **The reveal:** tap the video still on the reveal page to watch it large. When it ends, the book turns to "It's a boy!" by itself.
 - **The registry:** once `finale.registry.url` is set, tap the registry card to open it.
 - **Help text** fades in under the book only if nobody touches anything for 10 seconds. **Start over** appears on the last page.

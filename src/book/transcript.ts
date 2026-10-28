@@ -10,7 +10,7 @@ export function transcript(scene: SceneId): string[] {
     case 'once':
       return [c.once.text]
     case 'expecting':
-      return [c.expecting.heading, c.expecting.caption]
+      return [c.expecting.heading.replace('\n', ' '), c.expecting.caption]
     case 'reveal':
       return [c.reveal.heading, c.reveal.body]
     case 'boy':
