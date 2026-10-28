@@ -72,4 +72,6 @@ Playwright starts its own dev server on port 5199. On Macs it uses the GPU for W
 
 ## Deploying
 
-`npm run build` writes a static site to `dist/` for Netlify, Vercel, Cloudflare Pages, or GitHub Pages. For GitHub Pages under a sub-path, set `base` in `vite.config.ts`; media paths already respect it.
+The site is live at **https://mok4ry.github.io/mattandkaylalove/**. Every push to `main` runs `.github/workflows/pages.yml`, which runs the unit tests, builds the site and publishes it to GitHub Pages; it's live a minute or two later.
+
+The build uses relative paths, so `dist/` also works on any other static host (Netlify, Cloudflare Pages, …).
