@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#4b5a9e" />
+    <title>The Mokary Tales</title>
+    <meta name="description" content="A little story from Matt & Kayla." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Start the book's heavy files downloading at once, alongside the code. -->
+    <link rel="preload" href="media/book/book.glb" as="fetch" type="model/gltf-binary" crossorigin />
+    <link rel="preload" href="media/book/paper.jpg" as="image" />
+    <link rel="preload" href="media/once.jpg" as="image" />
+    <link rel="preload" href="media/reveal-poster.jpg" as="image" />
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

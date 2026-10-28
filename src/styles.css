@@ -1,0 +1,377 @@
+/* ---------- Tokens ---------- */
+:root {
+  /* a soft twilight sky */
+  --sky-top: #4b5a9e;
+  --sky-mid: #7180c2;
+  --sky-low: #b4bde6;
+  --parchment: #fbf4e4;
+  --ink: #3b2f2a;
+  --ink-soft: #8a7560;
+  --gold: #c9a24a;
+  --gold-soft: #f0d898;
+  --gold-deep: #a37f2c;
+  --leather: #9a4553;
+  --rose: #e2b3b8;
+  --boy: #7fabe0;
+  --boy-soft: #c7dbf3;
+  --boy-deep: #4673b0;
+  /* buttons and overlays sitting on the sky */
+  --chip: rgba(58, 70, 130, 0.55);
+  --chip-hover: rgba(58, 70, 130, 0.8);
+  --chip-border: rgba(240, 216, 152, 0.85);
+
+  --font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Cormorant Garamond', Georgia, serif;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  /* the book fills the screen; nothing ever scrolls */
+  overflow: hidden;
+}
+
+body {
+  background: var(--sky-top);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Stage, sky and book ---------- */
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.book-canvas {
+  position: absolute !important;
+  inset: 0;
+  z-index: 1;
+  touch-action: none;
+  cursor: grab;
+}
+.book-canvas:active {
+  cursor: grabbing;
+}
+
+/* Twilight: deep periwinkle overhead, warming to a peach glow at the horizon. */
+.sky {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(130% 60% at 50% 118%, rgba(255, 214, 196, 0.6) 0%, rgba(255, 214, 196, 0) 60%),
+    radial-gradient(70% 50% at 12% 28%, rgba(176, 156, 232, 0.28), transparent 70%),
+    radial-gradient(60% 40% at 90% 85%, rgba(150, 190, 240, 0.22), transparent 70%),
+    linear-gradient(180deg, #34407e 0%, #4a589f 32%, #6f7fc3 66%, #a3abdd 100%);
+}
+/* moonlight washing the upper right */
+.sky-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(45% 40% at 88% 10%, rgba(255, 244, 214, 0.22), transparent 70%);
+}
+.sky-starfield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sky-twinkler {
+  position: absolute;
+  translate: -50% -50%;
+  animation: twinkle ease-in-out infinite;
+}
+.sky-moon {
+  position: absolute;
+  top: 3.5%;
+  right: 6%;
+  width: clamp(64px, 12vw, 120px);
+  aspect-ratio: 1;
+}
+.sky-moon svg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(255, 246, 214, 0.55));
+}
+.sky-moon-halo {
+  position: absolute;
+  inset: -90%;
+  background:
+    radial-gradient(circle, rgba(255, 246, 214, 0.32) 0%, rgba(255, 246, 214, 0.1) 28%, rgba(255, 246, 214, 0) 55%);
+}
+/* soft wisps of cloud, drifting */
+.sky-cloud {
+  position: absolute;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+  filter: blur(6px);
+  animation: drift linear infinite;
+}
+.sky-cloud-1 { top: 16%; width: 340px; animation-duration: 120s; }
+.sky-cloud-2 { top: 62%; width: 460px; height: 90px; animation-duration: 170s; animation-delay: -80s; }
+.sky-cloud-3 { top: 84%; width: 300px; animation-duration: 140s; animation-delay: -40s; }
+/* fine grain, so the gradients never band */
+.sky-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Help text: hidden until the reader has left the book alone for a while, then it drifts in. */
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 2;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #fffaf0;
+  text-shadow: 0 1px 6px rgba(40, 50, 100, 0.45);
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 4px;
+  transition: opacity 0.3s ease, translate 0.3s ease;
+}
+.hint.is-visible {
+  opacity: 0.85;
+  translate: 0 0;
+  transition: opacity 2.4s ease, translate 2.4s ease;
+}
+
+/* "Opening the storybook…": fades in only if loading takes a moment, out once the book is ready. */
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  color: #fffaf0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  text-shadow: 0 1px 8px rgba(40, 50, 100, 0.5);
+  pointer-events: none;
+  opacity: 0;
+  animation: fade-in 0.8s ease forwards;
+}
+.loading p { margin: 0; }
+.loading.is-done {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.loading-stars {
+  display: flex;
+  gap: 12px;
+  color: var(--gold-soft);
+}
+.loading-stars svg {
+  width: 16px;
+  animation: twinkle 1.6s ease-in-out infinite;
+}
+.loading-stars svg:nth-child(2) { animation-delay: 0.25s; width: 20px; }
+.loading-stars svg:nth-child(3) { animation-delay: 0.5s; }
+
+/* ---------- Buttons over the sky ---------- */
+.restart,
+.player-close,
+.sr-focusable:focus {
+  padding: 0.45em 0.95em;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip);
+  backdrop-filter: blur(4px);
+  color: #fffaf0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+.restart {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 12px;
+  z-index: 40;
+}
+.restart:hover,
+.player-close:hover {
+  background: var(--chip-hover);
+}
+.restart:focus-visible,
+.player-close:focus-visible,
+.sr-focusable:focus-visible {
+  outline: 2px solid var(--gold-soft);
+  outline-offset: 3px;
+}
+
+/* Keyboard controls: invisible until focused, then they appear above the hint. */
+.book-controls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(56px, calc(env(safe-area-inset-bottom) + 44px));
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+}
+.sr-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- The reveal video, over the book ---------- */
+.player {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 56px 12px 24px;
+  background: rgba(60, 72, 130, 0.82);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+}
+.player.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease;
+}
+.player-frame {
+  width: min(100%, calc((100dvh - 96px) * 16 / 9), 1100px);
+  padding: 6px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold-deep));
+  box-shadow: 0 20px 60px rgba(30, 36, 80, 0.45);
+}
+.player-frame video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 7px;
+  background: #000;
+}
+.player-close {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: 12px;
+}
+
+/* ---------- Falling stars ("It's a boy!") ---------- */
+.falling-stars {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+.falling-star {
+  position: absolute;
+  top: -40px;
+  opacity: 0.9;
+  animation: fall linear infinite;
+}
+
+/* ---------- Dev scene picker ---------- */
+.dev-nav {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: calc(100vw - 16px);
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.dev-nav:hover,
+.dev-nav:focus-within {
+  opacity: 1;
+}
+.dev-nav button {
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 4px;
+  font: 11px/1.2 ui-monospace, Menlo, monospace;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+}
+.dev-nav button[aria-current='true'] {
+  background: var(--gold);
+  color: #1c2347;
+}
+
+/* ---------- Ambient loops ---------- */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+@keyframes drift {
+  from { transform: translateX(-480px); }
+  to { transform: translateX(calc(100vw + 480px)); }
+}
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+@keyframes fall {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(24px, 55vh) rotate(180deg); }
+  100% { transform: translate(-12px, 112vh) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-twinkler,
+  .sky-cloud,
+  .falling-star {
+    animation: none;
+  }
+  .falling-stars { display: none; }
+}
